@@ -20,10 +20,9 @@
 
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
-  <a href="https://travis-ci.org/{user}/{repository-name}"><img src="https://travis-ci.org/{user}/{repository-name}.svg?branch=master"></a>
 </p>
 
-This package provides cli-tool for your commits. You can measure lead time, deployment frequency, mean time to restore (MTTR) and change fail percentage of your repositories. If you want to contribute this package, please fork and [create](https://github.com/{user}/{repository-name}/pulls) a pull request.
+This package provides cli-tool for your commits. You can measure lead time, deployment frequency, mean time to restore (MTTR) and change fail percentage of your repositories. If you want to contribute this package, please fork and [create](https://github.com/Trendyol/four-key/pulls) a pull request.
 
 # Dependencies
 * git
@@ -42,7 +41,7 @@ This package provides cli-tool for your commits. You can measure lead time, depl
 
 Executables
 
-* Mac 64-bit: https://github.com/trendyol/
+* Mac 64-bit: https://github.com/Trendyol/four-key/releases/download/v0.1.0/four-key-mac-64.zip
 * Linux 64-bit: https://github.com/trendyol/
 * Windows 64-bit: https://github.com/trendyol/
 
@@ -143,4 +142,4 @@ Flags:
 * Add suggestions for metrics results
 
 # License
-The MIT License (MIT) - see [`LICENSE.md`](https://github.com/Trendyol/four-key/LICENSE.md) for more details
+The MIT License (MIT) - see [`LICENSE.md`](https://github.com/Trendyol/four-key/blob/master/LICENSE.md) for more details
