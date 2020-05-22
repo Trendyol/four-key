@@ -20,6 +20,8 @@
 
 <p align="center">
   <a href="#"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+  <a href="https://codecov.io/gh/Trendyol/four-key/branch/master/graphs/badge.svg?branch=master "><img src="https://codecov.io/gh/Trendyol/four-key/branch/master/graphs/badge.svg?branch=master"></a>
+  <a href="https://goreportcard.com/report/github.com/Trendyol/four-key"><img src="https://goreportcard.com/badge/github.com/Trendyol/four-key"></a>
 </p>
 
 This package provides cli-tool for your commits. You can measure lead time, deployment frequency, mean time to restore (MTTR) and change fail percentage of your repositories. If you want to contribute this package, please fork and [create](https://github.com/Trendyol/four-key/pulls) a pull request.
