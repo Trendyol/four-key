@@ -1,0 +1,16 @@
+sonar.host.url=http://sonarhost
+#----- Default source code encoding
+sonar.sourceEncoding=UTF-8
+
+# must be unique in a given SonarQube instance
+sonar.projectKey=FourKey:master
+sonar.projectName=Four Key
+
+sonar.tests=./src
+sonar.test.inclusions=**/*_test.go
+sonar.go.coverage.reportPaths=cover.out
+
+sonar.qualitygate.wait=true
+sonar.verbose=true
+sonar.language=go
+

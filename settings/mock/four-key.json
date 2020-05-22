@@ -1,0 +1,15 @@
+{
+  "output": "",
+  "repositories": [
+    {
+      "teamName": "reform",
+      "cloneAddress": "https://github.com/user/four-key-metrics.git",
+      "releaseTagPattern": "release-",
+      "fixCommitPatterns": [
+        "fix",
+        "hot-fix",
+        "hotfix"
+      ]
+    }
+  ]
+}
