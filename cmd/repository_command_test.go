@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"log"
 	"os/exec"
 	"strings"
 	"testing"
@@ -19,7 +18,7 @@ func TestAddCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf(err.Error())
 	}
 
 	want := "You must specify a repository to clone"
@@ -53,7 +52,7 @@ func TestAddCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf(err.Error())
 	}
 
 	want := "successfully added your repository to config file"
@@ -86,7 +85,7 @@ func TestRemoveCommand_WhenRunsWithCorrectArg_ReturnsOutput(t *testing.T) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf(err.Error())
 	}
 
 	cmd = exec.Command("go", "run", "../main.go", "remove",
@@ -94,7 +93,7 @@ func TestRemoveCommand_WhenRunsWithCorrectArg_ReturnsOutput(t *testing.T) {
 
 	out, err = cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf(err.Error())
 	}
 
 	want := "successfully removed four-key repository from the config file"
@@ -110,7 +109,7 @@ func TestRemoveCommand_WhenRunsWithDoesNotExistRepository_ReturnsOutput(t *testi
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf(err.Error())
 	}
 
 	want := "The four-key repository does not exist!"
@@ -125,7 +124,7 @@ func TestListCommand_WhenRunsCorrectly_ReturnsOutput(t *testing.T) {
 
 	out, err := cmd.Output()
 	if err != nil {
-		log.Fatal(err)
+		t.Errorf(err.Error())
 	}
 
 	want := "repository/repositories has been found"
