@@ -28,7 +28,7 @@ func TestRunCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
 
 func TestRunCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t *testing.T) {
 	addCmd := exec.Command("go", "run", "../main.go", "add",
-		"--cloneAddress", "https://github.com/Trendyol/four-key.git",
+		"--cloneAddress", "https://github.com/Trendyol/medusa.git",
 		"--team", "trendyol-team",
 		"--releaseTagPattern", "release-v",
 		"--fixCommitPatterns", "fix", "-f", "hotfix")
@@ -39,7 +39,7 @@ func TestRunCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t 
 	}
 
 	runCmd := exec.Command("go", "run", "../main.go", "run",
-		"--repository", "four-key",
+		"--repository", "medusa",
 		"--startDate", "",
 		"--endDate", "")
 
@@ -49,7 +49,7 @@ func TestRunCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t 
 	}
 
 	removeCmd := exec.Command("go", "run", "../main.go", "remove",
-		"--repository", "four-key")
+		"--repository", "medusa")
 
 	_, err = removeCmd.Output()
 	if err != nil {
@@ -65,9 +65,9 @@ func TestRunCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t 
 
 func TestRunCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
 	addCmd := exec.Command("go", "run", "../main.go", "add",
-		"--cloneAddress", "https://github.com/Trendyol/four-key.git",
+		"--cloneAddress", "https://github.com/Trendyol/android-ui-components.git",
 		"--team", "trendyol-team",
-		"--releaseTagPattern", "release-v",
+		"--releaseTagPattern", "toolbar-",
 		"--fixCommitPatterns", "fix", "-f", "hotfix")
 
 	_, err := addCmd.Output()
@@ -76,7 +76,7 @@ func TestRunCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
 	}
 
 	runCmd := exec.Command("go", "run", "../main.go", "run",
-		"--repository", "four-key",
+		"--repository", "android-ui-components",
 		"--startDate", "2019-01-01",
 		"--endDate", "2020-12-31")
 
@@ -86,7 +86,7 @@ func TestRunCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
 	}
 
 	removeCmd := exec.Command("go", "run", "../main.go", "remove",
-		"--repository", "four-key")
+		"--repository", "medusa")
 
 	_, err = removeCmd.Output()
 	if err != nil {
