@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Four-key by Trendyol</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-light.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Four-key</h1>
+        <p class="header">four-key is a measurement tool written with golang for your repositories. This project inspired from Accelerate book. </p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/Trendyol/four-key/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/Trendyol/four-key/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/Trendyol/four-key">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/Trendyol">Trendyol</a></p>
+
+
+      </header>
+      <section>
+        <p align="center">
+  <a href="#">
+    <img alt="4-key-metrics" src="./assets/logo.png" width="1180">
+  </a>
+</p>
+<h1 align="center">
+<a id="--four-key-metrics" class="anchor" href="#--four-key-metrics" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>
+  four-key Metrics
+</h1>
+<p align="center">
+  four-key is a measure tool written with golang for your repositories. This project inspired from <a href="https://itrevolution.com/book/accelerate/">Accelerate</a> book.
+  <br>
+  <a href="https://www.thoughtworks.com/radar/techniques/four-key-metrics">Thoughtworks Technology Radar</a>
+</p>
+<p align="center">
+  <a href="#">Documentation on Gitbook <g-emoji class="g-emoji" alias="link" fallback-src="https://github.githubassets.com/images/icons/emoji/unicode/1f517.png">🔗</g-emoji></a>
+</p>
+<p align="center">
+  <a href="#"><img src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
+  <a href="https://codecov.io/gh/Trendyol/four-key/branch/master/graphs/badge.svg?branch=master"><img src="https://codecov.io/gh/Trendyol/four-key/branch/master/graphs/badge.svg?branch=master"></a>
+  <a href="https://goreportcard.com/report/github.com/Trendyol/four-key"><img src="https://goreportcard.com/badge/github.com/Trendyol/four-key"></a>
+</p>
+<p>This package provides cli-tool for your commits. You can measure lead time, deployment frequency, mean time to restore (MTTR) and change fail percentage of your repositories. If you want to contribute this package, please fork and <a href="https://github.com/Trendyol/four-key/pulls">create</a> a pull request.</p>
+<h1>
+<a id="dependencies" class="anchor" href="#dependencies" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Dependencies</h1>
+<ul>
+<li>git</li>
+</ul>
+<h1>
+<a id="prerequisites" class="anchor" href="#prerequisites" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Prerequisites</h1>
+<br>
+    <ul>
+    <li>All releases must be tagged with a specific prefix and version number  [prefix][versionNumber]  like release-v15 or v-[commitSha] or rel12</li>
+    <li>Must be provided with -p yourTagPattern while adding repository OR add to config.json </li>
+    <li>All fixes must be specific like fix - hotfix - hot-fix </li>
+    <li>Must be provided with -c yourFixCommitPattern -c yourOtherCommitFixPattern -c yourOtherCommitFixPattern while adding repository OR add to config.json </li>
+    </ul>
+<h1>
+<a id="installation" class="anchor" href="#installation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Installation</h1>
+<p>Executables</p>
+<ul>
+<li>Mac 64-bit: <a href="https://github.com/Trendyol/four-key/releases/download/v0.1.0/four-key-mac-64.zip">https://github.com/Trendyol/four-key/releases/download/v0.1.0/four-key-mac-64.zip</a>
+</li>
+<li>Linux 64-bit: <a href="https://github.com/trendyol/">https://github.com/trendyol/</a>
+</li>
+<li>Windows 64-bit: <a href="https://github.com/trendyol/">https://github.com/trendyol/</a>
+</li>
+</ul>
+<pre><code>Source Code Build
+$ git clone https://github.com/Trendyol/four-key.git &amp;&amp; cd four-key
+$ go build
+</code></pre>
+<h1>
+<a id="preparation" class="anchor" href="#preparation" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Preparation</h1>
+<pre lang="cli"><code>// Add repository with CLI
+// OR Add repository with configuration file - Sample config.json
+{
+    "repositories":[
+        {
+            "teamName":"cs",
+            "cloneAddress": "https://github.com/Trendyol/reponame",
+            "releaseTagPattern": "v-",
+            "fixCommitPatterns": ["fix","hot-fix","hotfix"]
+        }
+    ]
+}
+
+</code></pre>
+<p><a href="https://asciinema.org/a/MHuwLNKOT9mifuCKPfy2QIUD9"><img src="https://asciinema.org/a/MHuwLNKOT9mifuCKPfy2QIUD9.svg" alt="asciicast"></a></p>
+<pre><code>add command usage
+
+$ four-key add [flags]
+
+Flags:
+  -c, --cloneAddress string             Set your clone address
+  -f, --fixCommitPatterns stringArray   Set your fix commit patterns of repository
+  -h, --help                            help for add
+  -r, --releaseTagPattern string        Set your release tag pattern of repository
+  -t, --team string                     Set your team of repository
+
+</code></pre>
+<pre><code>list command usage
+
+$ four-key list [flags]
+
+Flags:
+  -h, --help                help for remove
+
+</code></pre>
+<pre><code>remove command usage
+
+$ four-key remove [flags]
+
+Flags:
+  -h, --help                help for remove
+  -r, --repository string   Set your repository name to remove from config
+
+</code></pre>
+<p><a href="https://asciinema.org/a/dqIcYF1HXSIscgRdy2zkPOaUq"><img src="https://asciinema.org/a/dqIcYF1HXSIscgRdy2zkPOaUq.svg" alt="asciicast"></a></p>
+<pre><code>set command usage
+
+Usage:
+  four-key set [flags]
+
+Flags:
+  -h, --help            help for set
+  -o, --output string   Set output source of 4Key metric results
+</code></pre>
+<h1>
+<a id="generate" class="anchor" href="#generate" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Generate</h1>
+<pre><code>$ four-key run --startDate 2018-01-13 --endDate 2020-01-30
+
+Usage:
+  four-key run [flags]
+
+Flags:
+  -e, --endDate string      Set a end date of range
+  -h, --help                help for run
+  -r, --repository string   Set a name of the specific repository
+  -s, --startDate string    Set a start date of range
+
+</code></pre>
+<p><a href="https://asciinema.org/a/XSWFQHdyz8rnaSG7VUqpoaa8F"><img src="https://asciinema.org/a/XSWFQHdyz8rnaSG7VUqpoaa8F.svg" alt="asciicast"></a></p>
+<h1>
+<a id="todo" class="anchor" href="#todo" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>TODO</h1>
+<ul>
+<li>Add calculation descriptions for all metrics (In Progress)</li>
+<li>Add brew &amp; scoop as installation options (In Progress)</li>
+<li>Complete tests (In Progress)</li>
+<li>Add CI</li>
+<li>Complete Charts</li>
+<li>Add suggestions for metrics results</li>
+</ul>
+<h1>
+<a id="license" class="anchor" href="#license" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>License</h1>
+<p>The MIT License (MIT) - see <a href="https://github.com/Trendyol/four-key/blob/master/LICENSE.md"><code>LICENSE.md</code></a> for more details</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
