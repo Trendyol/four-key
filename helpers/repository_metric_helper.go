@@ -148,7 +148,8 @@ func GetTagDateRangeTotalCommits(repo *git.Repository, tagCommits []tagCommit) [
 
 func IsReleaseTag(tagName, releaseTagPattern string) bool {
 	var lowerTagName = strings.ToLower(tagName)
-	matched, err := regexp.MatchString(releaseTagPattern, lowerTagName)
+	var lowerReleaseTagPattern = strings.ToLower(releaseTagPattern)
+	matched, err := regexp.MatchString(lowerReleaseTagPattern, lowerTagName)
 	if err != nil {
 		println(err)
 	}
@@ -167,7 +168,7 @@ func getTagCommitBetweenDates(r *git.Repository, request MetricsRequest) ([]tagC
 	lastTagFound := false
 	firstTagFound := false
 	for _, t := range sortedTagList {
-		if !IsReleaseTag(string(t.tag.Name()), request.ReleaseTagPattern) {
+		if !IsReleaseTag(t.tag.Name().Short(), request.ReleaseTagPattern) {
 			continue
 		}
 
