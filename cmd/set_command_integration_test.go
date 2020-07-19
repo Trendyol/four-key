@@ -8,6 +8,10 @@ import (
 )
 
 func TestSetCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "set",
 		"--output", "")
 
@@ -24,6 +28,10 @@ func TestSetCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
 }
 
 func TestSetCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	userHomeDir, err := os.UserHomeDir()
 
 	if err != nil {

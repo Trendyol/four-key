@@ -6,9 +6,11 @@ import (
 	"testing"
 )
 
-// There is not any mocking. Do not run tests when use the this tool.
-
 func TestRunCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	runCmd := exec.Command("go", "run", "../main.go", "run",
 		"--repository", "",
 		"--startDate", "",
@@ -27,6 +29,10 @@ func TestRunCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
 }
 
 func TestRunCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	addCmd := exec.Command("go", "run", "../main.go", "add",
 		"--cloneAddress", "https://github.com/Trendyol/medusa.git",
 		"--team", "trendyol-team",
@@ -64,6 +70,10 @@ func TestRunCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t 
 }
 
 func TestRunCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	addCmd := exec.Command("go", "run", "../main.go", "add",
 		"--cloneAddress", "https://github.com/Trendyol/android-ui-components.git",
 		"--team", "trendyol-team",

@@ -7,9 +7,11 @@ import (
 	"testing"
 )
 
-// There is not any mocking. Do not run tests when use the this tool.
-
 func TestAddCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "add",
 		"--cloneAddress", "",
 		"--team", "",
@@ -29,6 +31,10 @@ func TestAddCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
 }
 
 func TestAddCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "add",
 		"--cloneAddress", "https://github.com/Trendyol/four-key.git",
 		"--teams=")
@@ -44,6 +50,10 @@ func TestAddCommand_WhenRunsWithCorrectCloneAddressButWrongArgs_ReturnsOutput(t 
 }
 
 func TestAddCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "add",
 		"--cloneAddress", "https://github.com/Trendyol/four-key.git",
 		"--team", "trendyol-team",
@@ -63,6 +73,10 @@ func TestAddCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
 }
 
 func TestRemoveCommand_WhenRunsWithWrongArg_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "remove",
 		"--repositorysss", "")
 
@@ -77,6 +91,10 @@ func TestRemoveCommand_WhenRunsWithWrongArg_ReturnsOutput(t *testing.T) {
 }
 
 func TestRemoveCommand_WhenRunsWithCorrectArg_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "add",
 		"--cloneAddress", "https://github.com/Trendyol/four-key.git",
 		"--team", "trendyol-team",
@@ -104,6 +122,10 @@ func TestRemoveCommand_WhenRunsWithCorrectArg_ReturnsOutput(t *testing.T) {
 }
 
 func TestRemoveCommand_WhenRunsWithDoesNotExistRepository_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "remove",
 		"--repository", "four-key")
 
@@ -120,6 +142,10 @@ func TestRemoveCommand_WhenRunsWithDoesNotExistRepository_ReturnsOutput(t *testi
 }
 
 func TestListCommand_WhenRunsCorrectly_ReturnsOutput(t *testing.T) {
+	if testing.Short() {
+		t.Skip()
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "list")
 
 	out, err := cmd.Output()
