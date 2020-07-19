@@ -35,3 +35,15 @@ jobs:
 
     - name: Test
       run: go test -v ./...
+    
+    - name: Generate coverage report
+      run: go test -v -short ./... -race -coverprofile=coverage.txt -covermode=atomic
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v1
+      with:
+        file: ./coverage.txt
+        flags: unittests
+        env_vars: GOLANG
+        name: codecov-umbrella
+        fail_ci_if_error: true
