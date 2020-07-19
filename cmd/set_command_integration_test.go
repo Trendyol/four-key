@@ -1,12 +1,11 @@
 package cmd
 
 import (
+	"os"
 	"os/exec"
 	"strings"
 	"testing"
 )
-
-// There is not any mocking. Do not run tests when use the this tool.
 
 func TestSetCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
 	cmd := exec.Command("go", "run", "../main.go", "set",
@@ -25,8 +24,14 @@ func TestSetCommand_WhenRunsWithEmptyArgs_ReturnsOutput(t *testing.T) {
 }
 
 func TestSetCommand_WhenRunsWithCorrectArgs_ReturnsOutput(t *testing.T) {
+	userHomeDir, err := os.UserHomeDir()
+
+	if err != nil {
+		t.Error(err)
+	}
+
 	cmd := exec.Command("go", "run", "../main.go", "set",
-		"--output", "/Users/furkan.bozdag/Desktop")
+		"--output", userHomeDir)
 
 	out, err := cmd.Output()
 	if err != nil {

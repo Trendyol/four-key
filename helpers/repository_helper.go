@@ -92,7 +92,7 @@ func RepoCheck(r *git.Repository) {
 
 	w, err := r.Worktree()
 	if err != nil {
-		panic(fmt.Sprintf("An error occured. Error: %v", err))
+		panic(fmt.Sprintf("An error occurred. Error: %v", err))
 	}
 
 	err = r.Fetch(&git.FetchOptions{
@@ -111,7 +111,7 @@ func RepoCheck(r *git.Repository) {
 	_, err = r.CommitObject(ref.Hash())
 
 	if err != nil {
-		panic(fmt.Sprintf("An error occured. Error: %v", err))
+		panic(fmt.Sprintf("An error occurred. Error: %v", err))
 	}
 
 }

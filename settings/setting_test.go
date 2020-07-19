@@ -72,6 +72,18 @@ func (s *Suite) TestInitialize_ReturnsSettings() {
 	s.Equal(settings.Repositories[0].TeamName, expectedTeamName)
 }
 
+func (s *Suite) TestInitialize_IfJsonFileIsNotCorrect_ReturnsJsonParseError() {
+	dir, err := os.Getwd()
+	s.Nil(err)
+	s.mock.On("GetFourKeyPath").Return(path.Join(dir, "/mock/incorrect_json"))
+
+	err = Initialize(&s.mock)
+
+	s.NotNil(err)
+	s.Equal(err.Error(), "An error occurred. Error: unexpected end of JSON input")
+	s.Equal(0, len(settings.Repositories))
+}
+
 func (s *Suite) TestInitialize_WhenReaderReturnedError_CreatesNewConfigurationFileAndWritesDefaultTemplate() {
 	dir, err := os.Getwd()
 	s.Nil(err)
@@ -165,7 +177,6 @@ func (s *Suite) TestInitialize_IfReturnsErrorWhenCreatingFourKeyDir_ReturnsError
 	s.mock.On("Warn", "Your configurations not found!").Return("Your configurations not found!")
 	s.mock.On("Warn", "Generating configuration file to -> ", path.Join(dir, fourKeyDir, EnvironmentFileName)).Return("Generating configuration file to -> ", path.Join(dir, fourKeyDir, EnvironmentFileName))
 	s.mock.On("Fatal", "An error occurred while creating four-key.json to ", path.Join(dir, fourKeyDir, EnvironmentFileName)).Return("An error occurred while creating four-key.json to ", path.Join(dir, fourKeyDir, EnvironmentFileName))
-	s.mock.On("Fatal", "Configurations not loaded").Return("Configurations not loaded")
 
 	err = Initialize(&s.mock)
 

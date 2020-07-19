@@ -81,8 +81,7 @@ func (s *Settings) Load() error {
 	jsonErr := json.Unmarshal(cfg, &settings)
 
 	if jsonErr != nil {
-		fmt.Println("Error while parsing config file", jsonErr)
-		return errors.New(fmt.Sprintf("An error occured. Error: %v", jsonErr))
+		return errors.New(fmt.Sprintf("An error occurred. Error: %v", jsonErr))
 	}
 
 	if settings.RepositoriesPath == "" {
@@ -102,7 +101,6 @@ func Initialize(cmd Command.ICommand) error {
 		err := settings.Load()
 
 		if err != nil {
-			fmt.Println(cmd.Fatal("Configurations not loaded"))
 			return err
 		}
 

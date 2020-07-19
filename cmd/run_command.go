@@ -323,7 +323,7 @@ func generateDirectory(sourceDir, dir string) (string, error) {
 			counter++
 
 			if counter > 1000 {
-				return "", errors.New("while true")
+				return "", errors.New("an infinite loop occurred while trying to create metric file")
 			}
 
 			d := dir + "_" + strconv.Itoa(counter)
