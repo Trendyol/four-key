@@ -116,6 +116,13 @@ func onRun(cmd *cobra.Command, args []string) {
 
 	var metricResultDtoList []FourKeyMetricResultDto
 
+	if len(repositories) < 1 {
+		fmt.Println(commander.Fatal("repository not found. please use -> $four-key add command or modify your configuration file \n"))
+		fmt.Println(commander.Good(fmt.Sprintf("configuration file path: %s ", commander.GetFourKeyPath())))
+		_ = commander.Open(commander.GetFourKeyPath())
+		return
+	}
+
 	for _, repo := range repositories {
 		metricsRequest := MetricsRequest{
 			StartDate:         startDate,
