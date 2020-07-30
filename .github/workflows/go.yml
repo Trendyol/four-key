@@ -44,6 +44,5 @@ jobs:
       with:
         file: ./coverage.txt
         flags: unittests
-        env_vars: GOLANG
         name: codecov-umbrella
         fail_ci_if_error: true
