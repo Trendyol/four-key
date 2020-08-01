@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-type TagWrapper struct {
+type TagData struct {
 	tagDate time.Time
 	tag     *plumbing.Reference
 }
 
-type timeSlice []TagWrapper
+type timeSlice []TagData
 
 func (p timeSlice) Len() int {
 	return len(p)
@@ -28,8 +28,9 @@ func (p timeSlice) Swap(i, j int) {
 	p[i], p[j] = p[j], p[i]
 }
 
-func SortTagsByDate(r *git.Repository) (tags []TagWrapper) {
-	var TagWrapperList = make(map[string]TagWrapper)
+func GetAscendingOrderByTagDate(r *git.Repository) (tags []TagData) {
+
+	var tagDataList = make(map[string]TagData)
 	rTags, err := r.Tags()
 	if err != nil {
 		println(err)
@@ -37,21 +38,21 @@ func SortTagsByDate(r *git.Repository) (tags []TagWrapper) {
 
 	var i = 0
 	err = rTags.ForEach(func(t *plumbing.Reference) error {
-		c, err := GetCommitFromTagHash(r, t.Hash())
+		cm, err := GetCommitFromTagHash(r, t.Hash())
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		if c != nil {
-			TagWrapperList[string(i)] = TagWrapper{c.Committer.When, t}
+		if cm != nil {
+			tagDataList[string(i)] = TagData{cm.Committer.When, t}
 			i++
 		}
 
 		return nil
 	})
 
-	sortedTagDataList := make(timeSlice, 0, len(TagWrapperList))
-	for _, tag := range TagWrapperList {
+	sortedTagDataList := make(timeSlice, 0, len(tagDataList))
+	for _, tag := range tagDataList {
 		sortedTagDataList = append(sortedTagDataList, tag)
 	}
 	sort.Sort(sortedTagDataList)

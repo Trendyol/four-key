@@ -19,7 +19,7 @@ type Setting interface {
 var settings Settings
 var isLoaded = false
 
-const DefaultConfigurationFileTemplate = `{"output": "%s", "repositories":[]}`
+const TemplateConfig = `{"repositories":[]}`
 const DefaultTeamName = "master"
 const EnvironmentFileName = "four-key.json"
 const DefaultRepositoryDirName = "repos"
@@ -65,7 +65,7 @@ func (s *Settings) Load() error {
 			return err
 		}
 
-		_, err = f.WriteString(fmt.Sprintf(DefaultConfigurationFileTemplate, s.commander.GetUserHomeDir()))
+		_, err = f.WriteString(TemplateConfig)
 
 		fmt.Println(s.commander.Good("Configuration file added."))
 		fmt.Println(s.commander.Good("please add an repository and run command like -> ./four-key run -s 2018-01-13 -e 2021-01-13"))

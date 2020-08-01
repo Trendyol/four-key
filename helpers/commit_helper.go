@@ -10,6 +10,7 @@ import (
 )
 
 func GetTagFixAndFeatureCommits(fixPatterns []string, tagDateRangeTotalCommits []object.Commit, tagCommits []tagCommit) (metricTags []tagMetricData) {
+
 	for i := 0; i < len(tagCommits); i++ {
 		var featureCommits []object.Commit
 		var fixCommits []object.Commit
