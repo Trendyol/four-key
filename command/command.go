@@ -1,4 +1,4 @@
-package Command
+package command
 
 import (
 	"errors"
@@ -10,6 +10,8 @@ import (
 	"runtime"
 	"strings"
 )
+
+const DefaultFourKeyDirName = "four-key"
 
 func (c *Commander) Info(args ...interface{}) string {
 	f := c.color("\033[1;36m%s\033[0m")
@@ -47,6 +49,7 @@ type ICommand interface {
 	Command(cmd string, p string) error
 	GetFourKeyPath() string
 	GetRepositoriesPath(cloneDir string) string
+	GetUserHomeDir() string
 	Info(...interface{}) string
 	Warn(...interface{}) string
 	Fatal(...interface{}) string
@@ -72,27 +75,33 @@ func (c *Commander) Command(command string, p string) error {
 }
 
 func (c *Commander) GetFourKeyPath() string {
-	r, err := os.UserHomeDir()
+	r := c.GetUserHomeDir()
+
+	p := path.Join(r, DefaultFourKeyDirName)
+	err := os.Chdir(p)
 
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(c.Fatal("four-key path not found! Error: %v", err))
 	}
-
-	p := path.Join(r, "four-key")
-	err = os.Mkdir(p, os.ModePerm)
 
 	return p
 }
 
-func (c *Commander) GetRepositoriesPath(cloneDir string) string {
+func (c *Commander) GetUserHomeDir() string {
 	r, err := os.UserHomeDir()
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	p := path.Join(r, "four-key", cloneDir)
-	err = os.Mkdir(p, os.ModePerm)
+	return r
+}
+
+func (c *Commander) GetRepositoriesPath(cloneDir string) string {
+	r := c.GetUserHomeDir()
+
+	p := path.Join(r, DefaultFourKeyDirName, cloneDir)
+	err := os.Mkdir(p, os.ModePerm)
 
 	log.Println(err)
 

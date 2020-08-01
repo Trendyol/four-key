@@ -160,11 +160,11 @@ func IsReleaseTag(tagName, releaseTagPattern string) bool {
 func getTagCommitBetweenDates(r *git.Repository, request MetricsRequest) ([]tagCommit, error) {
 	var commitTags []tagCommit
 
-	var sortedTagList = GetAscendingOrderByTagDate(r)
-
+	var sortedTagList = SortTagsByDate(r)
 	var prevTag *tagCommit
 	var lastTag *tagCommit
 	var firstTag *tagCommit
+
 	lastTagFound := false
 	firstTagFound := false
 	for _, t := range sortedTagList {
