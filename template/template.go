@@ -33,12 +33,24 @@ func GetHtml() string {
                 deploymentFrequencyChart: ""
             }
 
+            
+            function getWeek(date) {
+                const dayNumber = (date.getDay() + 6) % 7;
+                date.setDate(date.getDate() - dayNumber + 3);
+
+                let tempDate = new Date(date.getFullYear(), 0, 4);
+                let dayDiff = (date - tempDate) / 86400000;
+                return 1 + Math.ceil(dayDiff / 7);
+            }
+
             function prepareData(data) {
                 let newData = Object.assign([], data)
                 let months = []
                 let years = []
+                let weeks = []
                 let days = []
                 let monthly = []
+                let weekly = []
 
                 newData.sort(function (a, b) {
                     return new Date(a.date) - new Date(b.date);
@@ -50,6 +62,8 @@ func GetHtml() string {
                     const month = ALL_MONTHS_SHORT[date.getMonth()]
                     const day = date.getDate()
                     const year = date.getFullYear()
+                    const week = getWeek(date)
+
                     if (!item.month) {
                         item.month = month
                     }
@@ -58,6 +72,9 @@ func GetHtml() string {
                     }
                     if (!item.year) {
                         item.year = year
+                    }
+                    if (!item.week) {
+                        item.week = week
                     }
                     if (!days.includes(day)) {
                         days.push(day)
@@ -68,6 +85,10 @@ func GetHtml() string {
                     if (!years.includes(year)) {
                         years.push(year)
                     }
+                    if (!weeks.includes(week)) {
+                        weeks.push({ week, year })
+                    }
+
                 });
 
                 years.forEach(year => {
@@ -75,10 +96,24 @@ func GetHtml() string {
                         monthly[year] = []
                     }
 
-                    let totalValue = 0
-                    totalValue = newData.filter(item => item.year == year).reduce(function getSum(total, item) {
-                        return total + parseInt(item.value);
-                    }, totalValue)
+                    if (!weekly.includes(year)) {
+                        weekly[year] = []
+                        for (let i = 0; i < 52; i++) {
+                            weekly[year].push({
+                                label: i + 1,
+                                totalValue: 0
+                            })
+                        }
+                    }
+
+                    weeks.forEach((week) => {
+                        totalValue = 0
+                        let totalWeeks = weeks.filter(item =>
+                            item.week == week.week && year == week.year
+                        )
+                        weekly[year][week.week - 1].totalValue = totalWeeks.length
+                    });
+
 
                     ALL_MONTHS_SHORT.forEach(mon => {
                         totalValue = 0
@@ -90,14 +125,14 @@ func GetHtml() string {
                             label: mon,
                             totalValue
                         })
-
                     });
-
                 });
+
 
                 return {
                     data: newData,
-                    monthly
+                    monthly,
+                    weekly
                 }
             }
 
@@ -109,11 +144,11 @@ func GetHtml() string {
                 var red = randomNum();
                 var green = randomNum();
                 var blue = randomNum();
-                return red + ", " + green + ", 235";
+                return red + ", " + green + ", " + blue;
             }
 
             function getDataSets(data) {
-                const a = Object.entries(data).map(([key, values]) => {
+                return Object.entries(data).map(([key, values]) => {
                     return {
                         label: key,
                         data: values.map(item => item.totalValue), fill: false,
@@ -126,8 +161,6 @@ func GetHtml() string {
                         borderWidth: 5
                     }
                 })
-
-                return a
             }
 
             function getChartData(chartId, type) {
@@ -135,7 +168,7 @@ func GetHtml() string {
                 const activeLabelType = LABEL_TYPES.find(labelType => labelType == type)
 
                 return {
-                    labels: activeLabelType == "monthly" ? ALL_MONTHS_SHORT : Object.keys(data[activeLabelType]),
+                    labels: Object.values(data[activeLabelType])[0].map(item => item.label),
                     datasets: getDataSets(data[activeLabelType])
                 }
             }
