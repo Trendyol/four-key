@@ -85,8 +85,8 @@ func CalculateMetrics(repo *git.Repository, request MetricsRequest) (FourKeyMetr
 			tagMetricDto := TagMetricDto{
 				TagName:                tagNameParse[len(tagNameParse)-1],
 				TagDate:                tagMetricDateRange.tagDate,
-				MeanTimeRestoreAverage: GetSecondsToHour(tagMetricDateRange.tagMeanTimeRestoreAverageSeconds),
-				LeadTime:               GetSecondsToHour(tagMetricDateRange.tagLeadTimeSeconds),
+				MeanTimeRestoreAverage: tagMetricDateRange.tagMeanTimeRestoreAverageSeconds,
+				LeadTime:               tagMetricDateRange.tagLeadTimeSeconds,
 				ChangeFailPercentage:   tagMetricDateRange.tagChangeFailPercentage,
 			}
 			tagMetricDtoList = append(tagMetricDtoList, tagMetricDto)

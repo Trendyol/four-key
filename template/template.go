@@ -10,541 +10,284 @@ func GetHtml() string {
     <title>four-key Metrics</title>
 
     <link href="https://fonts.googleapis.com/css?family=Rubik:400,500&display=swap" rel="stylesheet">
-    <script src="https://www.amcharts.com/lib/4/core.js"></script>
-    <script src="https://www.amcharts.com/lib/4/charts.js"></script>
-    <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.3/dist/Chart.min.js"></script>
 
     <script type="text/javascript">
-        am4core.ready(function () {
-            var mtData = {mtData};
-            initMeanTime(mtData, groupBy(mtData, false));
+        document.addEventListener("DOMContentLoaded", function () {
+            const COLORS = ["rgba(242,130,50,1)", "rgba(102,225,191,1)", "rgba(235,69,47,1)", "rgba(121,123,170,1)"];
+            const LABEL_TYPES = ["weekly", "monthly", "average"];
+            const CHART_NAMES = ["meanTimeChart", "leadTimeChart", "failPercengatesChart", "deploymentFrequencyChart"];
+            const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const chartButtons = Array.from(document.querySelectorAll('.btn-chart'));
 
-            var ltData = {ltData};
-            initLeadTime(ltData, groupBy(ltData, false));
+            let chartData = {};
+            let charts = {};
+            
+            chartData[CHART_NAMES[0]] = {mtData};
+            chartData[CHART_NAMES[1]] = {ltData};
+            chartData[CHART_NAMES[2]] = {fpData};
+            chartData[CHART_NAMES[3]] = {dfData};
+            charts[CHART_NAMES[0]] = "";
+            charts[CHART_NAMES[1]] = "";
+            charts[CHART_NAMES[2]] = "";
+            charts[CHART_NAMES[3]] = "";
 
-            var fpData = {fpData};
-            initFailPercentage(fpData, groupBy(fpData, false));
+            function getWeekAndYear(d) {
+                d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+                const firstDayOfYear = new Date(d.getUTCFullYear(), 0, 1)
+                let year = d.getUTCFullYear();
+                let weekNo = Math.ceil((((d - firstDayOfYear) / 86400000) + firstDayOfYear.getDay()) / 7);
 
-            var dfData = {dfData};
-            initDeploymentFrequencies(dfData, groupBy(dfData, true));
-        });
-
-
-        function initMeanTime(data, groupped) {
-            for (var i = 0; i < groupped.length; i++) {
-                var monthOfYear = Object.keys(groupped[i]).map(function (key) {
-                    return {
-                        month: key,
-                        ...groupped[i][key],
-                    };
-                });
-
-                monthOfYear = monthOfYear.filter(function (key) {
-                    return !isNaN(parseInt(key.month));
-                });
-                monthOfYear.forEach(function (entry) {
-                    var date = new Date(entry[entry.month][0].date);
-                    data.push({
-                        date: date.getFullYear() + "-" + (date.getMonth() + 1) + "-15",
-                        monthValue: entry[entry.month].reduce((a, b) => a + b.value, 0),
-                    });
-                });
-            }
-
-            var monthData = data.filter(function (entry) {
-                return !isNaN(parseInt(entry.monthValue))
-            }).sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-            data.push({
-                date: monthData[0].date,
-                averageValue: monthData[0].monthValue,
-            });
-            data.push({
-                date: monthData[monthData.length - 1].date,
-                averageValue: monthData.reduce((a, b) => a + b.monthValue, 0) / monthData.length,
-            });
-
-            am4core.useTheme(am4themes_animated);
-
-            var chart = am4core.create("meanTimeDiv", am4charts.XYChart);
-
-            chart.colors.step = 2;
-
-            chart.data = data.sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-
-            var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-            dateAxis.renderer.minGridDistance = 50;
-
-            function createAxisAndSeries(field, name, opposite, selectedBullet, hidden) {
-                var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-                if (chart.yAxes.indexOf(valueAxis) != 0) {
-                    valueAxis.syncWithAxis = chart.yAxes.getIndex(0);
+                if (weekNo > 52) {
+                    weekNo = 1;
+                    year = d.getUTCFullYear() + 1;
                 }
 
-                var series = chart.series.push(new am4charts.LineSeries());
-                series.dataFields.valueY = field;
-                series.dataFields.dateX = "date";
-                series.strokeWidth = 3;
-                series.yAxis = valueAxis;
-                series.name = name;
-                series.tooltipText = "[bold]{valueY}[/] hours";
-                series.showOnInit = true;
-                series.hidden = hidden;
-
-                var interfaceColors = new am4core.InterfaceColorSet();
-
-                var bullet = {};
-                switch (selectedBullet) {
-                    case "triangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 12;
-                        bullet.height = 12;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var triangle = bullet.createChild(am4core.Triangle);
-                        triangle.stroke = interfaceColors.getFor("background");
-                        triangle.strokeWidth = 3;
-                        triangle.direction = "top";
-                        triangle.width = 12;
-                        triangle.height = 12;
-                        break;
-                    case "rectangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 10;
-                        bullet.height = 10;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var rectangle = bullet.createChild(am4core.Rectangle);
-                        rectangle.stroke = interfaceColors.getFor("background");
-                        rectangle.strokeWidth = 3;
-                        rectangle.width = 10;
-                        rectangle.height = 10;
-                        break;
-                    default:
-                        bullet = series.bullets.push(new am4charts.CircleBullet());
-                        bullet.circle.stroke = interfaceColors.getFor("background");
-                        bullet.circle.strokeWidth = 3;
-                        break;
-                }
-
-                valueAxis.renderer.line.strokeOpacity = 1;
-                valueAxis.renderer.line.strokeWidth = 3;
-                valueAxis.renderer.line.stroke = series.stroke;
-                valueAxis.renderer.labels.template.fill = series.stroke;
-                valueAxis.renderer.opposite = opposite;
-            }
-
-            //initMeanTime
-            createAxisAndSeries("value", "Daily", false, "circle", false);
-            createAxisAndSeries("monthValue", "Monthly", false, "triangle", true);
-            createAxisAndSeries("averageValue", "Average", false, "rectangle", false);
-
-            chart.legend = new am4charts.Legend();
-            chart.cursor = new am4charts.XYCursor();
-        }
-
-        function initLeadTime(data, groupped) {
-            for (var i = 0; i < groupped.length; i++) {
-                var monthOfYear = Object.keys(groupped[i]).map(function (key) {
-                    return {
-                        month: key,
-                        ...groupped[i][key],
-                    };
-                });
-
-                monthOfYear = monthOfYear.filter(function (key) {
-                    return !isNaN(parseInt(key.month));
-                });
-                monthOfYear.forEach(function (entry) {
-                    var date = new Date(entry[entry.month][0].date);
-                    data.push({
-                        date: date.getFullYear() + "-" + (date.getMonth() + 1) + "-15",
-                        monthValue: entry[entry.month].reduce((a, b) => a + b.value, 0),
-                    });
-                });
-            }
-
-            var monthData = data.filter(function (entry) {
-                return !isNaN(parseInt(entry.monthValue))
-            }).sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-            data.push({
-                date: monthData[0].date,
-                averageValue: monthData[0].monthValue,
-            });
-            data.push({
-                date: monthData[monthData.length - 1].date,
-                averageValue: monthData.reduce((a, b) => a + b.monthValue, 0) / monthData.length,
-            });
-
-            am4core.useTheme(am4themes_animated);
-
-            var chart = am4core.create("leadTimeDiv", am4charts.XYChart);
-
-            chart.colors.step = 2;
-            chart.data = data.sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-
-            var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-            dateAxis.renderer.minGridDistance = 50;
-
-            function createAxisAndSeries(field, name, opposite, selectedBullet, hidden) {
-                var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-                if (chart.yAxes.indexOf(valueAxis) != 0) {
-                    valueAxis.syncWithAxis = chart.yAxes.getIndex(0);
-                }
-
-                var series = chart.series.push(new am4charts.LineSeries());
-                series.dataFields.valueY = field;
-                series.dataFields.dateX = "date";
-                series.strokeWidth = 3;
-                series.yAxis = valueAxis;
-                series.name = name;
-                series.tooltipText = "[bold]{valueY}[/] hours";
-                series.showOnInit = true;
-                series.hidden = hidden;
-
-                var interfaceColors = new am4core.InterfaceColorSet();
-
-                var bullet = {};
-                switch (selectedBullet) {
-                    case "triangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 12;
-                        bullet.height = 12;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var triangle = bullet.createChild(am4core.Triangle);
-                        triangle.stroke = interfaceColors.getFor("background");
-                        triangle.strokeWidth = 3;
-                        triangle.direction = "top";
-                        triangle.width = 12;
-                        triangle.height = 12;
-                        break;
-                    case "rectangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 10;
-                        bullet.height = 10;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var rectangle = bullet.createChild(am4core.Rectangle);
-                        rectangle.stroke = interfaceColors.getFor("background");
-                        rectangle.strokeWidth = 3;
-                        rectangle.width = 10;
-                        rectangle.height = 10;
-                        break;
-                    default:
-                        bullet = series.bullets.push(new am4charts.CircleBullet());
-                        bullet.circle.stroke = interfaceColors.getFor("background");
-                        bullet.circle.strokeWidth = 3;
-                        break;
-                }
-
-                valueAxis.renderer.line.strokeOpacity = 1;
-                valueAxis.renderer.line.strokeWidth = 3;
-                valueAxis.renderer.line.stroke = series.stroke;
-                valueAxis.renderer.labels.template.fill = series.stroke;
-                valueAxis.renderer.opposite = opposite;
-            }
-
-            //initLeadTime
-            createAxisAndSeries("value", "Daily", false, "circle", false);
-            createAxisAndSeries("monthValue", "Monthly", false, "triangle", true);
-            createAxisAndSeries("averageValue", "Average", false, "rectangle", false);
-
-            chart.legend = new am4charts.Legend();
-            chart.cursor = new am4charts.XYCursor();
-        }
-
-        function initFailPercentage(data, groupped) {
-            for (var i = 0; i < groupped.length; i++) {
-                var monthOfYear = Object.keys(groupped[i]).map(function (key) {
-                    return {
-                        month: key,
-                        ...groupped[i][key],
-                    };
-                });
-
-                monthOfYear = monthOfYear.filter(function (key) {
-                    return !isNaN(parseInt(key.month));
-                });
-                monthOfYear.forEach(function (entry) {
-                    var date = new Date(entry[entry.month][0].date);
-                    data.push({
-                        date: date.getFullYear() + "-" + (date.getMonth() + 1) + "-15",
-                        monthValue: entry[entry.month].reduce((a, b) => a + b.value, 0),
-                    });
-                });
-            }
-
-            var monthData = data.filter(function (entry) {
-                return !isNaN(parseInt(entry.monthValue))
-            }).sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-            data.push({
-                date: monthData[0].date,
-                averageValue: monthData[0].monthValue,
-            });
-            data.push({
-                date: monthData[monthData.length - 1].date,
-                averageValue: monthData.reduce((a, b) => a + b.monthValue, 0) / monthData.length,
-            });
-
-            am4core.useTheme(am4themes_animated);
-
-            var chart = am4core.create("failPercentageDiv", am4charts.XYChart);
-
-            chart.colors.step = 2;
-            chart.data = data.sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-
-            var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-            dateAxis.renderer.minGridDistance = 50;
-
-            function createAxisAndSeries(field, name, opposite, selectedBullet, hidden) {
-                var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-                if (chart.yAxes.indexOf(valueAxis) != 0) {
-                    valueAxis.syncWithAxis = chart.yAxes.getIndex(0);
-                }
-
-                var series = chart.series.push(new am4charts.LineSeries());
-                series.dataFields.valueY = field;
-                series.dataFields.dateX = "date";
-                series.strokeWidth = 3;
-                series.yAxis = valueAxis;
-                series.name = name;
-                series.tooltipText = "%[bold]{valueY}[/]";
-                series.showOnInit = true;
-                series.hidden = hidden;
-
-                var interfaceColors = new am4core.InterfaceColorSet();
-
-                var bullet = {};
-                switch (selectedBullet) {
-                    case "triangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 12;
-                        bullet.height = 12;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var triangle = bullet.createChild(am4core.Triangle);
-                        triangle.stroke = interfaceColors.getFor("background");
-                        triangle.strokeWidth = 3;
-                        triangle.direction = "top";
-                        triangle.width = 12;
-                        triangle.height = 12;
-                        break;
-                    case "rectangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 10;
-                        bullet.height = 10;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var rectangle = bullet.createChild(am4core.Rectangle);
-                        rectangle.stroke = interfaceColors.getFor("background");
-                        rectangle.strokeWidth = 3;
-                        rectangle.width = 10;
-                        rectangle.height = 10;
-                        break;
-                    default:
-                        bullet = series.bullets.push(new am4charts.CircleBullet());
-                        bullet.circle.stroke = interfaceColors.getFor("background");
-                        bullet.circle.strokeWidth = 3;
-                        break;
-                }
-
-                valueAxis.renderer.line.strokeOpacity = 1;
-                valueAxis.renderer.line.strokeWidth = 3;
-                valueAxis.renderer.line.stroke = series.stroke;
-                valueAxis.renderer.labels.template.fill = series.stroke;
-                valueAxis.renderer.opposite = opposite;
-            }
-            //FailPercentage
-            createAxisAndSeries("value", "Daily", false, "circle", false);
-            createAxisAndSeries("monthValue", "Monthly", false, "triangle", true);
-            createAxisAndSeries("averageValue", "Average", false, "rectangle", false);
-
-            chart.legend = new am4charts.Legend();
-            chart.cursor = new am4charts.XYCursor();
-        }
-
-        function initDeploymentFrequencies(data, groupped) {
-            for (var i = 0; i < groupped.length; i++) {
-                var monthOfYear = Object.keys(groupped[i]).map(function (key) {
-                    return {
-                        month: key,
-                        ...groupped[i][key],
-                    };
-                });
-
-                monthOfYear = monthOfYear.filter(function (key) {
-                    return !isNaN(parseInt(key.month));
-                });
-                monthOfYear.forEach(function (entry) {
-                    var date = new Date(entry[entry.month][0].date);
-                    data.push({
-                        date: date.getFullYear() + "-" + (date.getMonth() + 1) + "-15",
-                        monthValue: entry[entry.month].reduce((a, b) => a + b.value, 0),
-                    });
-                });
-            }
-
-            var monthData = data.filter(function (entry) {
-                return !isNaN(parseInt(entry.monthValue))
-            }).sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-            data.push({
-                date: monthData[0].date,
-                averageValue: monthData[0].monthValue,
-            });
-            data.push({
-                date: monthData[monthData.length - 1].date,
-                averageValue: monthData.reduce((a, b) => a + b.monthValue, 0) / monthData.length,
-            });
-
-            am4core.useTheme(am4themes_animated);
-
-            var chart = am4core.create("deploymentFrequencyDiv", am4charts.XYChart);
-
-            chart.colors.step = 2;
-            chart.data = data.sort(function (a, b) {
-                return new Date(a.date) - new Date(b.date);
-            });
-
-            var dateAxis = chart.xAxes.push(new am4charts.DateAxis());
-            dateAxis.renderer.minGridDistance = 50;
-
-            function createAxisAndSeries(field, name, opposite, selectedBullet, hidden) {
-                var valueAxis = chart.yAxes.push(new am4charts.ValueAxis());
-                if (chart.yAxes.indexOf(valueAxis) != 0) {
-                    valueAxis.syncWithAxis = chart.yAxes.getIndex(0);
-                }
-
-                var series = chart.series.push(new am4charts.LineSeries());
-                series.dataFields.valueY = field;
-                series.dataFields.dateX = "date";
-                series.strokeWidth = 3;
-                series.yAxis = valueAxis;
-                series.name = name;
-                series.tooltipText = "{name}: [bold]{valueY}[/]";
-                series.showOnInit = true;
-                series.hidden = hidden;
-
-                var interfaceColors = new am4core.InterfaceColorSet();
-
-                var bullet = {};
-                switch (selectedBullet) {
-                    case "triangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 12;
-                        bullet.height = 12;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var triangle = bullet.createChild(am4core.Triangle);
-                        triangle.stroke = interfaceColors.getFor("background");
-                        triangle.strokeWidth = 3;
-                        triangle.direction = "top";
-                        triangle.width = 12;
-                        triangle.height = 12;
-                        break;
-                    case "rectangle":
-                        bullet = series.bullets.push(new am4charts.Bullet());
-                        bullet.width = 10;
-                        bullet.height = 10;
-                        bullet.horizontalCenter = "middle";
-                        bullet.verticalCenter = "middle";
-
-                        var rectangle = bullet.createChild(am4core.Rectangle);
-                        rectangle.stroke = interfaceColors.getFor("background");
-                        rectangle.strokeWidth = 3;
-                        rectangle.width = 10;
-                        rectangle.height = 10;
-                        break;
-                    default:
-                        bullet = series.bullets.push(new am4charts.CircleBullet());
-                        bullet.circle.stroke = interfaceColors.getFor("background");
-                        bullet.circle.strokeWidth = 3;
-                        break;
-                }
-
-                valueAxis.renderer.line.strokeOpacity = 1;
-                valueAxis.renderer.line.strokeWidth = 3;
-                valueAxis.renderer.line.stroke = series.stroke;
-                valueAxis.renderer.labels.template.fill = series.stroke;
-                valueAxis.renderer.opposite = opposite;
-            }
-
-            //initDeploymentFrequencies
-            createAxisAndSeries("value", "Daily", false, "circle", false);
-            createAxisAndSeries("monthValue", "Monthly", false, "triangle", true);
-            createAxisAndSeries("averageValue", "Average", false, "rectangle", false);
-
-            chart.legend = new am4charts.Legend();
-            chart.cursor = new am4charts.XYCursor();
-        }
-
-        function groupBy(data, isDf) {
-            let res = {};
-
-            let fn = (o, year, month, array) => {
-                o[year][month] = {
-                    [month]: data.filter(({date: d}) => (year + "-" + month) === d.slice(0, 7))
-                };
-            };
-
-            for (var i = 0; i < data.length; i++) {
-                if (isDf && data.length > i + 1 && data[i].date === data[i + 1].date) {
-                    data[i].value += data[i + 1].value;
-                }
-
-                let [year, month] = data[i].date.match(/\d+/g);
-                if (!res[year]) res[year] = {};
-                fn(res, year, month, data);
-
-                if (isDf && data.length > i + 1 && data[i].date === data[i + 1].date) {
-                    data.splice(i + 1, 1);
-                    i--;
-                }
-            }
-
-            return Object.keys(res).map(function (key) {
                 return {
-                    year: parseInt(key),
-                    ...res[key]
+                    weekNo,
+                    year
                 };
+            }
+
+            function prepareData(chartId) {
+                const data = chartData[chartId];
+                let newData = Object.assign([], data);
+                let months = [];
+                let years = [];
+                let weeks = [];
+                let days = [];
+                let monthly = [];
+                let weekly = [];
+                let totalValue;
+
+                newData.sort(function (a, b) {
+                    return new Date(a.date) - new Date(b.date);
+                });
+
+                newData.forEach(item => {
+                    const splittedDate = item.date.split("-");
+                    const date = new Date(splittedDate[0] + "-" + splittedDate[1] + "-" + splittedDate[2]);
+                    const month = ALL_MONTHS[date.getMonth()];
+                    const day = date.getDate();
+                    const year = date.getFullYear();
+                    const weekAndYear = getWeekAndYear(date);
+
+                    if (!item.month) {
+                        item.month = month;
+                    }
+                    if (!item.day) {
+                        item.day = day;
+                    }
+                    if (!item.year) {
+                        item.year = year;
+                    }
+                    if (!item.week) {
+                        item.week = weekAndYear.weekNo;
+                    }
+                    if (!days.includes(day)) {
+                        days.push(day);
+                    }
+                    if (!months.includes(month)) {
+                        months.push(month);
+                    }
+                    if (!years.includes(year)) {
+                        years.push(year);
+                    }
+                    if (!weeks.includes(weekAndYear.weekNo)) {
+                        weeks.push({ number: weekAndYear.weekNo, year: weekAndYear.year });
+                    }
+                });
+
+                years.forEach(year => {
+                    if (!monthly.includes(year)) {
+                        monthly[year] = [];
+                    }
+
+                    if (!weekly.includes(year)) {
+                        weekly[year] = [];
+                        for (let i = 0; i < 52; i++) {
+                            weekly[year].push({
+                                label: i + 1,
+                                totalValue: 0
+                            })
+                        }
+                    }
+                    weeks.forEach((week) => {
+                        totalValue = 0;
+                        let totalWeeks = weeks.filter(item =>
+                            item.number == week.number && year == week.year
+                        )
+
+                        if (chartId === CHART_NAMES[0] || chartId === CHART_NAMES[1]) {
+                            totalValue = newData.filter(item =>
+                                item.week == week.number && item.year == year
+                            ).reduce(function getSum(total, item) {
+                                return total + parseFloat(item.value);
+                            }, totalValue);
+
+                            const timeLabel = secondsToString(totalValue);
+                            weekly[year][week.number - 1].totalValue = timeLabel.timeTextNumeric;
+                        } else {
+                            weekly[year][week.number - 1].totalValue = totalWeeks.length;
+                        }
+                    });
+
+
+                    ALL_MONTHS.forEach(mon => {
+                        totalValue = 0;
+                        totalValue = newData.filter(item => item.month == mon && item.year == year).reduce(function getSum(total, item) {
+                            return total + parseFloat(item.value);
+                        }, totalValue)
+
+                        if (chartId === CHART_NAMES[0] || chartId === CHART_NAMES[1] && totalValue > 0) {
+                            const timeLabel = secondsToString(totalValue);
+                            monthly[year].push({
+                                label: mon,
+                                totalValue: timeLabel.timeTextNumeric
+                            })
+                        } else {
+                            monthly[year].push({
+                                label: mon,
+                                totalValue
+                            })
+                        }
+                    });
+                });
+
+                return {
+                    data: newData,
+                    monthly,
+                    weekly
+                }
+            }
+
+            function secondsToString(seconds) {
+                const dayNumber = Math.floor((seconds % 31536000) / 86400);
+                const hourNumber = Math.floor(((seconds % 31536000) % 86400) / 3600);
+                const minuteNumber = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+                const totalHourNumber = (dayNumber * 24) + hourNumber;
+
+                return {
+                    timeText: totalHourNumber + "d " + minuteNumber + "m",
+                    timeTextNumeric: totalHourNumber + "." + minuteNumber,
+                    totalHourNumber,
+                };
+
+            }
+
+            function getDataSets(data) {
+                let index = -1;
+                return Object.entries(data).map(([key, values]) => {
+                    index++;
+                    return {
+                        label: key,
+                        data: values.map(item => item.totalValue), fill: false,
+                        backgroundColor: [
+                            COLORS[index]
+                        ],
+                        borderColor: [
+                            COLORS[index]
+                        ],
+                        borderWidth: 5
+                    }
+                })
+            }
+
+            function getChartData(chartId, type) {
+                const data = prepareData(chartId);
+                const activeLabelType = LABEL_TYPES.find(labelType => labelType === type);
+                return {
+                    labels: Object.values(data[activeLabelType])[0].map(item => item.label),
+                    datasets: getDataSets(data[activeLabelType])
+                }
+            }
+
+            function createChart(chartId) {
+                const ctx = document.getElementById(chartId).getContext('2d');
+                charts[chartId] = new Chart(ctx, {
+                    type: 'line',
+                    data: getChartData(chartId, LABEL_TYPES[1]),
+                    options: {
+                        tooltips: {
+                            mode: 'point',
+                            intersect: false,
+                            callbacks: {
+                                label: function (tooltipItem, data) {
+                                    if (chartId === CHART_NAMES[0] || chartId === CHART_NAMES[1]) {
+                                        const label = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || '';
+                                        if (label.length > 1) {
+                                            const labelArr = label.split('.');
+                                            return labelArr[0] + "h " + labelArr[1] + "m";
+                                        } else {
+                                            return label
+                                        }
+
+                                    } else if (chartId === CHART_NAMES[3]) {
+                                        return data.datasets[tooltipItem.datasetIndex].label + ": " + tooltipItem.value + " Releases"
+                                    } else if (chartId === CHART_NAMES[2]) {
+                                        return data.datasets[tooltipItem.datasetIndex].label + ": " + "%" + parseFloat(tooltipItem.value).toFixed(2).replace(/\.?0+$/, '')
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            function updateChart(chartId, labelType) {
+                charts[chartId].config.data = getChartData(chartId, labelType);
+                charts[chartId].update();
+            }
+
+            createChart("deploymentFrequencyChart");
+            createChart("leadTimeChart");
+            createChart("meanTimeChart");
+            createChart("failPercengatesChart");
+
+            chartButtons.forEach(button => {
+                button.addEventListener("click", function (event) {
+                    const chartId = event.target.getAttribute("data-chart-id");
+                    const buttonType = event.target.getAttribute('data-button-type');
+                    chartButtons.forEach(btn => {
+                        if (btn.classList.contains('active') && button.getAttribute('data-chart-id') === btn.getAttribute('data-chart-id')) {
+                            btn.classList.remove('active');
+                        }
+                    });
+
+                    if (!button.classList.contains('active')) {
+                        button.classList.add('active');
+                    }
+
+                    updateChart(chartId, buttonType);
+                })
             });
-        }
+        })
     </script>
 
     <style>
-        body {
+        * {
             font-family: 'Rubik', sans-serif;
+        }
+
+        body {
+            margin: 0;
+            text-rendering: optimizeLegibility !important;
+            -webkit-font-smoothing: antialiased !important;
+            background-color: #f4f4f4;
         }
 
         div {
             width: 100%;
-            height: 300px;
             max-width: 100%;
         }
 
         .container {
-            height: 100%;
-            width: 100%;
+            height: auto;
+            width: 1000px;
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 50px;
+            background-color: #ffffff;
         }
 
         .container .title {
@@ -569,34 +312,115 @@ func GetHtml() string {
         }
 
         .container .chart-title {
-            margin-block-end: 0.5em;
             font-size: 2rem;
             margin-left: 10px;
             font-weight: 400;
         }
+
+        canvas {
+            margin: 50px 0;
+        }
+
+        .button-wrapper {
+            margin: auto;
+            width: max-content;
+        }
+
+        .btn-chart {
+            -moz-appearance: none;
+            -webkit-appearance: none;
+            -ms-progress-appearance: unset;
+            border: 1px solid #767676;
+            background-color: transparent;
+            color: #767676;
+            font-size: 12px;
+            padding: 7px 14px;
+            margin: 0 5px;
+            outline: none;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .btn-chart:hover,
+        .btn-chart.active {
+            border: 1px solid #2185d0;
+            color: #2185d0;
+        }
+
+        .btn-chart:disabled,
+        .btn-chart:disabled:hover {
+            border: none;
+            background-color: #767676;
+            color: #cdcdcd;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 1080px) {
+            .container {
+                width: 100%;
+                max-width: calc(100% - 40px);
+                padding: 50px 20px;
+            }
+        }
     </style>
 </head>
+
 <body>
-<div class="container">
-    <h4 class="title">four-key Metrics</h4>
-    <h6 class="subtitle">{repositoryName} <span>|</span> {teamName} <span>|</span> {startDate} - {endDate}</h6>
+    <div class="container">
+        <h4 class="title">four-key Metrics</h4>
+        <h6 class="subtitle">allTeams <span>|</span> allTeams <span>|</span> 2019-01-01 - 2021-01-01</h6>
 
-    <h6 class="chart-title">Deployment Frequencies</h6>
-    <div id="deploymentFrequencyDiv"></div>
+        <div class="deployment-frequency-chart-wrapper">
+            <h6 class="chart-title">Deployment Frequencies</h6>
+            <canvas id="deploymentFrequencyChart"></canvas>
+            <div class="button-wrapper">
+                <button data-chart-id="deploymentFrequencyChart" data-button-type="weekly"
+                    class="btn-chart">Weekly</button>
+                <button data-chart-id="deploymentFrequencyChart" data-button-type="monthly"
+                    class="btn-chart active">Monthly</button>
+                <button data-chart-id="deploymentFrequencyChart" data-button-type="average" class="btn-chart"
+                    disabled>Average</button>
+            </div>
+        </div>
 
-    <h6 class="chart-title">Lead Times</h6>
-    <div id="leadTimeDiv"></div>
+        <div class="lead-time-chart-wrapper">
+            <h6 class="chart-title">Lead Times</h6>
+            <canvas id="leadTimeChart"></canvas>
+            <div class="button-wrapper">
+                <button data-chart-id="leadTimeChart" data-button-type="weekly" class="btn-chart">Weekly</button>
+                <button data-chart-id="leadTimeChart" data-button-type="monthly"
+                    class="btn-chart active">Monthly</button>
+                <button data-chart-id="leadTimeChart" data-button-type="average" class="btn-chart"
+                    disabled>Average</button>
+            </div>
+        </div>
 
-    <h6 class="chart-title">Mean Times</h6>
-    <div id="meanTimeDiv"></div>
+        <div class="mean-time-chart-wrapper">
+            <h6 class="chart-title">Mean Times</h6>
+            <canvas id="meanTimeChart" width="400" height="400"></canvas>
+            <div class="button-wrapper">
+                <button data-chart-id="meanTimeChart" data-button-type="weekly" class="btn-chart">Weekly</button>
+                <button data-chart-id="meanTimeChart" data-button-type="monthly"
+                    class="btn-chart active">Monthly</button>
+                <button data-chart-id="meanTimeChart" data-button-type="average" class="btn-chart"
+                    disabled>Average</button>
+            </div>
+        </div>
 
-    <h6 class="chart-title">Fail Percentages</h6>
-    <div id="failPercentageDiv"></div>
-</div>
+        <div class="fail-percengates-chart-wrapper">
+            <h6 class="chart-title">Fail Percentages</h6>
+            <canvas id="failPercengatesChart"></canvas>
+            <div class="button-wrapper">
+                <button data-chart-id="failPercengatesChart" data-button-type="weekly" class="btn-chart">Weekly</button>
+                <button data-chart-id="failPercengatesChart" data-button-type="monthly"
+                    class="btn-chart active">Monthly</button>
+                <button data-chart-id="failPercengatesChart" data-button-type="average" class="btn-chart"
+                    disabled>Average</button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>
-
-
 
 	`
 }
