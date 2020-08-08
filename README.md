@@ -136,10 +136,10 @@ Flags:
 [![asciicast](https://asciinema.org/a/XSWFQHdyz8rnaSG7VUqpoaa8F.svg)](https://asciinema.org/a/XSWFQHdyz8rnaSG7VUqpoaa8F)
 
 # TODO
-* Add calculation descriptions for all metrics (In Progress)
-* Add brew & scoop as installation options (In Progress)
+* Add brew & scoop as installation options (TODO)
 * Complete tests (In Progress)
 * Add CI
+* Add calculation descriptions to wiki (In Progress)
 * Complete Charts
 * Add suggestions for metrics results
 
