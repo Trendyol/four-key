@@ -368,7 +368,7 @@ func GetHtml() string {
 <body>
     <div class="container">
         <h4 class="title">four-key Metrics</h4>
-        <h6 class="subtitle">allTeams <span>|</span> allTeams <span>|</span> 2019-01-01 - 2021-01-01</h6>
+        <h6 class="subtitle">{repositoryName} <span>|</span> {teamName} <span>|</span> {startDate} - {endDate}</h6>
 
         <div class="deployment-frequency-chart-wrapper">
             <h6 class="chart-title">Deployment Frequencies</h6>
