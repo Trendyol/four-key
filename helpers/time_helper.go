@@ -6,6 +6,7 @@ import (
 	"gopkg.in/src-d/go-git.v4/plumbing"
 	"gopkg.in/src-d/go-git.v4/plumbing/object"
 	"sort"
+	"strconv"
 	"time"
 )
 
@@ -44,7 +45,7 @@ func GetAscendingOrderByTagDate(r *git.Repository) (tags []TagData) {
 		}
 
 		if cm != nil {
-			tagDataList[string(i)] = TagData{cm.Committer.When, t}
+			tagDataList[strconv.Itoa(i)] = TagData{cm.Committer.When, t}
 			i++
 		}
 
@@ -91,7 +92,7 @@ func GetDescendingCommits(r *git.Repository) (tags []CommitData) {
 		if err != nil {
 			//fmt.Println(err)
 		}
-		commitDataList[string(i)] = CommitData{commit.Committer.When, *commit}
+		commitDataList[strconv.Itoa(i)] = CommitData{commit.Committer.When, *commit}
 		i++
 
 		return nil
