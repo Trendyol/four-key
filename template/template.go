@@ -16,7 +16,7 @@ func GetHtml() string {
         document.addEventListener("DOMContentLoaded", function () {
             const COLORS = ["rgba(242,130,50,1)", "rgba(102,225,191,1)", "rgba(235,69,47,1)", "rgba(121,123,170,1)"];
             const LABEL_TYPES = ["weekly", "monthly", "average"];
-            const CHART_NAMES = { "meanTimeChart": "meanTimeChart", "leadTimeChart": "leadTimeChart", "failPercengatesChart": "failPercengatesChart", "deploymentFrequencyChart": "deploymentFrequencyChart" };
+            const CHART_NAMES = { "meanTimeChart": "meanTimeChart", "leadTimeChart": "leadTimeChart", "failPercentagesChart": "failPercentagesChart", "deploymentFrequencyChart": "deploymentFrequencyChart" };
             const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             const chartButtons = Array.from(document.querySelectorAll('.btn-chart'));
 
@@ -25,11 +25,11 @@ func GetHtml() string {
             
             chartData[CHART_NAMES["meanTimeChart"]] = {mtData};
             chartData[CHART_NAMES["leadTimeChart"]] = {ltData};
-            chartData[CHART_NAMES["failPercengatesChart"]] = {fpData};
+            chartData[CHART_NAMES["failPercentagesChart"]] = {fpData};
             chartData[CHART_NAMES["deploymentFrequencyChart"]] = {dfData};
             charts[CHART_NAMES["meanTimeChart"]] = "";
             charts[CHART_NAMES["leadTimeChart"]] = "";
-            charts[CHART_NAMES["failPercengatesChart"]] = "";
+            charts[CHART_NAMES["failPercentagesChart"]] = "";
             charts[CHART_NAMES["deploymentFrequencyChart"]] = "";
 
             function getWeekAndYear(d) {
@@ -119,7 +119,7 @@ func GetHtml() string {
                             item.number == week.number && year == week.year
                         )
 
-                        if (chartId === CHART_NAMES["meanTimeChart"] || chartId === CHART_NAMES["leadTimeChart"]) {
+                        if (chartId !== CHART_NAMES["deploymentFrequencyChart"]) {
                             totalValue = newData.filter(item =>
                                 item.week == week.number && item.year == year
                             ).reduce(function getSum(total, item) {
@@ -192,9 +192,7 @@ func GetHtml() string {
                 })
             }
 
-            function getAverageOfPreparedData(data, activeLabelType, chartId) {
-                const deploymentFrequencyData = prepareData("deploymentFrequencyChart");
-
+            function getAverageOfPreparedData(data, activeLabelType, chartId, deploymentFrequencyData) {
                 for (const [key, items] of Object.entries(data[activeLabelType])) {
                     items.map(item => {
                         for (const [dfKey, dfItems] of Object.entries(deploymentFrequencyData[activeLabelType])) {
@@ -220,7 +218,7 @@ func GetHtml() string {
             function getChartData(chartId, type) {
                 const activeLabelType = LABEL_TYPES.find(labelType => labelType === type);
                 const deploymentFrequencyData = prepareData("deploymentFrequencyChart")
-                const data = chartId === "deploymentFrequencyChart" ? deploymentFrequencyData : getAverageOfPreparedData(prepareData(chartId), activeLabelType, chartId);
+                const data = chartId === "deploymentFrequencyChart" ? deploymentFrequencyData : getAverageOfPreparedData(prepareData(chartId), activeLabelType, chartId, deploymentFrequencyData);
                 return {
                     labels: Object.values(data[activeLabelType])[0].map(item => item.label),
                     datasets: getDataSets(data[activeLabelType])
@@ -241,7 +239,7 @@ func GetHtml() string {
                                 label: function (tooltipItem, data) {
                                     if (chartId === CHART_NAMES["deploymentFrequencyChart"]) {
                                         return data.datasets[tooltipItem.datasetIndex].label + ": " + tooltipItem.value + " Releases";
-                                    } else if (chartId === CHART_NAMES["failPercengatesChart"]) {
+                                    } else if (chartId === CHART_NAMES["failPercentagesChart"]) {
                                         return data.datasets[tooltipItem.datasetIndex].label + ": " + "%" + parseFloat(tooltipItem.value).toFixed(2).replace(/\.?0+$/, "");
                                     } else {
                                         const label = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].toString() || "";
@@ -267,7 +265,7 @@ func GetHtml() string {
             createChart("deploymentFrequencyChart");
             createChart("leadTimeChart");
             createChart("meanTimeChart");
-            createChart("failPercengatesChart");
+            createChart("failPercentagesChart");
 
             chartButtons.forEach(button => {
                 button.addEventListener("click", function (event) {
@@ -435,12 +433,12 @@ func GetHtml() string {
 
         <div class="fail-percengates-chart-wrapper">
             <h6 class="chart-title">Fail Percentages</h6>
-            <canvas id="failPercengatesChart"></canvas>
+            <canvas id="failPercentagesChart"></canvas>
             <div class="button-wrapper">
-                <button data-chart-id="failPercengatesChart" data-button-type="weekly" class="btn-chart">Weekly</button>
-                <button data-chart-id="failPercengatesChart" data-button-type="monthly"
+                <button data-chart-id="failPercentagesChart" data-button-type="weekly" class="btn-chart">Weekly</button>
+                <button data-chart-id="failPercentagesChart" data-button-type="monthly"
                     class="btn-chart active">Monthly</button>
-                <button data-chart-id="failPercengatesChart" data-button-type="average" class="btn-chart"
+                <button data-chart-id="failPercentagesChart" data-button-type="average" class="btn-chart"
                     disabled>Average</button>
             </div>
         </div>
