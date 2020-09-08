@@ -16,25 +16,25 @@ func GetHtml() string {
         document.addEventListener("DOMContentLoaded", function () {
             const COLORS = ["rgba(242,130,50,1)", "rgba(102,225,191,1)", "rgba(235,69,47,1)", "rgba(121,123,170,1)"];
             const LABEL_TYPES = ["weekly", "monthly", "average"];
-            const CHART_NAMES = ["meanTimeChart", "leadTimeChart", "failPercengatesChart", "deploymentFrequencyChart"];
+            const CHART_NAMES = { "meanTimeChart": "meanTimeChart", "leadTimeChart": "leadTimeChart", "failPercengatesChart": "failPercengatesChart", "deploymentFrequencyChart": "deploymentFrequencyChart" };
             const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             const chartButtons = Array.from(document.querySelectorAll('.btn-chart'));
 
             let chartData = {};
             let charts = {};
             
-            chartData[CHART_NAMES[0]] = {mtData};
-            chartData[CHART_NAMES[1]] = {ltData};
-            chartData[CHART_NAMES[2]] = {fpData};
-            chartData[CHART_NAMES[3]] = {dfData};
-            charts[CHART_NAMES[0]] = "";
-            charts[CHART_NAMES[1]] = "";
-            charts[CHART_NAMES[2]] = "";
-            charts[CHART_NAMES[3]] = "";
+            chartData[CHART_NAMES["meanTimeChart"]] = {mtData};
+            chartData[CHART_NAMES["leadTimeChart"]] = {ltData};
+            chartData[CHART_NAMES["failPercengatesChart"]] = {fpData};
+            chartData[CHART_NAMES["deploymentFrequencyChart"]] = {dfData};
+            charts[CHART_NAMES["meanTimeChart"]] = "";
+            charts[CHART_NAMES["leadTimeChart"]] = "";
+            charts[CHART_NAMES["failPercengatesChart"]] = "";
+            charts[CHART_NAMES["deploymentFrequencyChart"]] = "";
 
             function getWeekAndYear(d) {
                 d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-                const firstDayOfYear = new Date(d.getUTCFullYear(), 0, 1)
+                const firstDayOfYear = new Date(d.getUTCFullYear(), 0, 1);
                 let year = d.getUTCFullYear();
                 let weekNo = Math.ceil((((d - firstDayOfYear) / 86400000) + firstDayOfYear.getDay()) / 7);
 
@@ -112,43 +112,42 @@ func GetHtml() string {
                             })
                         }
                     }
+
                     weeks.forEach((week) => {
                         totalValue = 0;
                         let totalWeeks = weeks.filter(item =>
                             item.number == week.number && year == week.year
                         )
 
-                        if (chartId === CHART_NAMES[0] || chartId === CHART_NAMES[1]) {
+                        if (chartId === CHART_NAMES["meanTimeChart"] || chartId === CHART_NAMES["leadTimeChart"]) {
                             totalValue = newData.filter(item =>
                                 item.week == week.number && item.year == year
                             ).reduce(function getSum(total, item) {
                                 return total + parseFloat(item.value);
                             }, totalValue);
 
-                            const timeLabel = secondsToString(totalValue);
-                            weekly[year][week.number - 1].totalValue = timeLabel.timeTextNumeric;
+                            weekly[year][week.number - 1].totalValue = totalValue;
                         } else {
                             weekly[year][week.number - 1].totalValue = totalWeeks.length;
                         }
                     });
-
 
                     ALL_MONTHS.forEach(mon => {
                         totalValue = 0;
                         totalValue = newData.filter(item => item.month == mon && item.year == year).reduce(function getSum(total, item) {
                             return total + parseFloat(item.value);
                         }, totalValue)
-
-                        if (chartId === CHART_NAMES[0] || chartId === CHART_NAMES[1] && totalValue > 0) {
-                            const timeLabel = secondsToString(totalValue);
+                        if (chartId === CHART_NAMES["meanTimeChart"] || chartId === CHART_NAMES["leadTimeChart"] && totalValue > 0) {
                             monthly[year].push({
                                 label: mon,
-                                totalValue: timeLabel.timeTextNumeric
+                                year,
+                                totalValue: totalValue
                             })
                         } else {
                             monthly[year].push({
                                 label: mon,
-                                totalValue
+                                year,
+                                totalValue: totalValue
                             })
                         }
                     });
@@ -168,9 +167,9 @@ func GetHtml() string {
                 const totalHourNumber = (dayNumber * 24) + hourNumber;
 
                 return {
-                    timeText: totalHourNumber + "d " + minuteNumber + "m",
+                    timeText: totalHourNumber + "h " + minuteNumber + "m",
                     timeTextNumeric: totalHourNumber + "." + minuteNumber,
-                    totalHourNumber,
+                    totalHourNumber
                 };
 
             }
@@ -193,9 +192,35 @@ func GetHtml() string {
                 })
             }
 
+            function getAverageOfPreparedData(data, activeLabelType, chartId) {
+                const deploymentFrequencyData = prepareData("deploymentFrequencyChart");
+
+                for (const [key, items] of Object.entries(data[activeLabelType])) {
+                    items.map(item => {
+                        for (const [dfKey, dfItems] of Object.entries(deploymentFrequencyData[activeLabelType])) {
+                            const releaseData = dfItems.find(dfItem => dfItem.label === item.label && dfItem.year === item.year);
+                            const averageValue = releaseData && releaseData.totalValue && releaseData.totalValue > 0 ? calculateAverage(item.totalValue, releaseData.totalValue) : item.totalValue;
+                            if (chartId === CHART_NAMES["meanTimeChart"] || chartId === CHART_NAMES["leadTimeChart"] && averageValue > 0 && releaseData) {
+                                const timeLabel = secondsToString(averageValue);
+                                item.totalValue = timeLabel.timeTextNumeric;
+                            } else {
+                                item.totalValue = averageValue;
+                            }
+                        }
+                    })
+                }
+
+                return data;
+            }
+
+            function calculateAverage(sum, count) {
+                return sum / count;
+            }
+
             function getChartData(chartId, type) {
-                const data = prepareData(chartId);
                 const activeLabelType = LABEL_TYPES.find(labelType => labelType === type);
+                const deploymentFrequencyData = prepareData("deploymentFrequencyChart")
+                const data = chartId === "deploymentFrequencyChart" ? deploymentFrequencyData : getAverageOfPreparedData(prepareData(chartId), activeLabelType, chartId);
                 return {
                     labels: Object.values(data[activeLabelType])[0].map(item => item.label),
                     datasets: getDataSets(data[activeLabelType])
@@ -203,29 +228,29 @@ func GetHtml() string {
             }
 
             function createChart(chartId) {
-                const ctx = document.getElementById(chartId).getContext('2d');
+                const ctx = document.getElementById(chartId).getContext("2d");
                 charts[chartId] = new Chart(ctx, {
-                    type: 'line',
+                    type: "line",
+                    responsive: true,
                     data: getChartData(chartId, LABEL_TYPES[1]),
                     options: {
                         tooltips: {
-                            mode: 'point',
+                            mode: "point",
                             intersect: false,
                             callbacks: {
                                 label: function (tooltipItem, data) {
-                                    if (chartId === CHART_NAMES[0] || chartId === CHART_NAMES[1]) {
-                                        const label = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index] || '';
+                                    if (chartId === CHART_NAMES["deploymentFrequencyChart"]) {
+                                        return data.datasets[tooltipItem.datasetIndex].label + ": " + tooltipItem.value + " Releases";
+                                    } else if (chartId === CHART_NAMES["failPercengatesChart"]) {
+                                        return data.datasets[tooltipItem.datasetIndex].label + ": " + "%" + parseFloat(tooltipItem.value).toFixed(2).replace(/\.?0+$/, "");
+                                    } else {
+                                        const label = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index].toString() || "";
                                         if (label.length > 1) {
-                                            const labelArr = label.split('.');
-                                            return labelArr[0] + "h " + labelArr[1] + "m";
+                                            const labelArr = label.split(".");
+                                            return labelArr[0] + "h " + labelArr[1].slice(0, 2) + "m";
                                         } else {
-                                            return label
+                                            return label;
                                         }
-
-                                    } else if (chartId === CHART_NAMES[3]) {
-                                        return data.datasets[tooltipItem.datasetIndex].label + ": " + tooltipItem.value + " Releases"
-                                    } else if (chartId === CHART_NAMES[2]) {
-                                        return data.datasets[tooltipItem.datasetIndex].label + ": " + "%" + parseFloat(tooltipItem.value).toFixed(2).replace(/\.?0+$/, '')
                                     }
                                 }
                             }
@@ -247,15 +272,15 @@ func GetHtml() string {
             chartButtons.forEach(button => {
                 button.addEventListener("click", function (event) {
                     const chartId = event.target.getAttribute("data-chart-id");
-                    const buttonType = event.target.getAttribute('data-button-type');
+                    const buttonType = event.target.getAttribute("data-button-type");
                     chartButtons.forEach(btn => {
-                        if (btn.classList.contains('active') && button.getAttribute('data-chart-id') === btn.getAttribute('data-chart-id')) {
-                            btn.classList.remove('active');
+                        if (btn.classList.contains("active") && button.getAttribute("data-chart-id") === btn.getAttribute("data-chart-id")) {
+                            btn.classList.remove("active");
                         }
                     });
 
-                    if (!button.classList.contains('active')) {
-                        button.classList.add('active');
+                    if (!button.classList.contains("active")) {
+                        button.classList.add("active");
                     }
 
                     updateChart(chartId, buttonType);
@@ -266,7 +291,7 @@ func GetHtml() string {
 
     <style>
         * {
-            font-family: 'Rubik', sans-serif;
+            font-family: "Rubik", sans-serif;
         }
 
         body {
@@ -318,6 +343,7 @@ func GetHtml() string {
         }
 
         canvas {
+            width: 100%;
             margin: 50px 0;
         }
 
