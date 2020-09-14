@@ -9,12 +9,13 @@ import (
 	. "four-key/models"
 	"four-key/settings"
 	"four-key/template"
-	"github.com/spf13/cobra"
 	"os"
 	"path"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/spf13/cobra"
 )
 
 var runCommand = &cobra.Command{
@@ -284,7 +285,14 @@ func createChartItems(metrics []TagMetricDto) ChartItems {
 
 func generateOutput(dir string, items ChartItems, results FourKeyMetricResultDto, outputSource string, open bool) error {
 	var h *os.File
+	var j *os.File
 	h, err := os.Create(path.Join(outputSource, results.TeamName, dir, "index.html"))
+
+	if err != nil {
+		return err
+	}
+
+	j, err = os.Create(path.Join(outputSource, results.TeamName, dir, "metrics.json"))
 
 	if err != nil {
 		return err
@@ -300,6 +308,20 @@ func generateOutput(dir string, items ChartItems, results FourKeyMetricResultDto
 
 	if err != nil {
 		err = h.Close()
+
+		if err != nil {
+			return err
+		}
+
+		return err
+	}
+
+	resultsJson, err := json.Marshal(results)
+
+	_, err = j.WriteString(string(resultsJson))
+
+	if err != nil {
+		err = j.Close()
 
 		if err != nil {
 			return err
