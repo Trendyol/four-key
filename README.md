@@ -43,7 +43,7 @@ This package provides cli-tool for your commits. You can measure lead time, depl
 
 Executables
 
-* Mac 64-bit: https://github.com/Trendyol/four-key/releases/download/v0.1.0/four-key-mac-64.zip
+* Mac 64-bit: https://github.com/Trendyol/four-key/archive/v0.1.6.tar.gz
 * Linux 64-bit: https://github.com/trendyol/
 * Windows 64-bit: https://github.com/trendyol/
 
