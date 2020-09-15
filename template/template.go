@@ -20,6 +20,7 @@ func GetHtml() string {
             const ALL_MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
             const chartButtons = Array.from(document.querySelectorAll('.btn-chart'));
 
+            const MEAN_TIME_CHART = "meanTimeChart"
             let chartData = {};
             let charts = {};
             
@@ -27,6 +28,7 @@ func GetHtml() string {
             chartData[CHART_NAMES["leadTimeChart"]] = {ltData};
             chartData[CHART_NAMES["failPercentagesChart"]] = {fpData};
             chartData[CHART_NAMES["deploymentFrequencyChart"]] = {dfData};
+
             charts[CHART_NAMES["meanTimeChart"]] = "";
             charts[CHART_NAMES["leadTimeChart"]] = "";
             charts[CHART_NAMES["failPercentagesChart"]] = "";
@@ -119,36 +121,60 @@ func GetHtml() string {
                             item.number == week.number && year == week.year
                         )
 
-                        if (chartId !== CHART_NAMES["deploymentFrequencyChart"]) {
+                        if (chartId === CHART_NAMES[MEAN_TIME_CHART]) {
                             totalValue = newData.filter(item =>
                                 item.week == week.number && item.year == year
-                            ).reduce(function getSum(total, item) {
+                            ).reduce((total, item) => {
                                 return total + parseFloat(item.value);
                             }, totalValue);
 
                             weekly[year][week.number - 1].totalValue = totalValue;
-                        } else {
+
+
+                            let list = newData.filter(item =>
+                                item.week == week.number && item.year == year && item.value > 0
+                            )
+
+                            weekly[year][week.number - 1].failedReleaseCount = list.length
+
+                        } else if (chartId === CHART_NAMES["deploymentFrequencyChart"]) {
                             weekly[year][week.number - 1].totalValue = totalWeeks.length;
+                        } else {
+                            totalValue = newData.filter(item =>
+                                item.week == week.number && item.year == year
+                            ).reduce((total, item) => {
+                                return total + parseFloat(item.value);
+                            }, totalValue);
+
+                            weekly[year][week.number - 1].totalValue = totalValue;
+                        }
+
+                        if (chartId === CHART_NAMES[MEAN_TIME_CHART]) {
+                            console.log(weekly[year][week.number - 1])
                         }
                     });
 
                     ALL_MONTHS.forEach(mon => {
                         totalValue = 0;
-                        totalValue = newData.filter(item => item.month == mon && item.year == year).reduce(function getSum(total, item) {
+
+                        totalValue = newData.filter(item => item.month == mon && item.year == year).reduce((total, item) => {
                             return total + parseFloat(item.value);
                         }, totalValue)
-                        if (chartId === CHART_NAMES["meanTimeChart"] || chartId === CHART_NAMES["leadTimeChart"] && totalValue > 0) {
+
+                        if (chartId !== MEAN_TIME_CHART) {
                             monthly[year].push({
                                 label: mon,
                                 year,
                                 totalValue: totalValue
                             })
                         } else {
+                            let failedReleases = newData.filter(item => item.month == mon && item.year == year && item.value > 0);
                             monthly[year].push({
-                                label: mon,
-                                year,
-                                totalValue: totalValue
-                            })
+                            label: mon,
+                            year,
+                            totalValue: totalValue,
+                            failedReleaseCount: failedReleases.length
+                        })
                         }
                     });
                 });
@@ -196,9 +222,12 @@ func GetHtml() string {
                 for (const [key, items] of Object.entries(data[activeLabelType])) {
                     items.map(item => {
                         for (const [dfKey, dfItems] of Object.entries(deploymentFrequencyData[activeLabelType])) {
+
                             const releaseData = dfItems.find(dfItem => dfItem.label === item.label && dfItem.year === item.year);
-                            const averageValue = releaseData && releaseData.totalValue && releaseData.totalValue > 0 ? calculateAverage(item.totalValue, releaseData.totalValue) : item.totalValue;
-                            if (chartId === CHART_NAMES["meanTimeChart"] || chartId === CHART_NAMES["leadTimeChart"] && averageValue > 0 && releaseData) {
+                            let divider = chartId === MEAN_TIME_CHART ? item.failedReleaseCount : releaseData.totalValue
+                            const averageValue = divider > 0 ? calculateAverage(item.totalValue, divider) : item.totalValue;
+
+                            if (chartId === CHART_NAMES["meanTimeChart"] || chartId === CHART_NAMES["leadTimeChart"] && averageValue > 0) {
                                 const timeLabel = secondsToString(averageValue);
                                 item.totalValue = timeLabel.timeTextNumeric;
                             } else {
@@ -212,6 +241,7 @@ func GetHtml() string {
             }
 
             function calculateAverage(sum, count) {
+                console.log("sum -> ", sum, "count -> ", count, "avg -> ", sum / count)
                 return sum / count;
             }
 
@@ -392,7 +422,7 @@ func GetHtml() string {
 <body>
     <div class="container">
         <h4 class="title">four-key Metrics</h4>
-        <h6 class="subtitle">{repositoryName} <span>|</span> {teamName} <span>|</span> {startDate} - {endDate}</h6>
+        <h6 class="subtitle">test-4-4-key <span>|</span> reform <span>|</span> 2019-01-01 - 2021-01-01</h6>
 
         <div class="deployment-frequency-chart-wrapper">
             <h6 class="chart-title">Deployment Frequencies</h6>
