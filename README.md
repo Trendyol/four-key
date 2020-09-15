@@ -140,7 +140,6 @@ Flags:
 * Complete tests (In Progress)
 * Add CI
 * Add calculation descriptions to wiki (In Progress)
-* Complete Charts
 * Add suggestions for metrics results
 
 # License
