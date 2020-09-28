@@ -34,7 +34,7 @@ jobs:
       run: go build -v .
 
     - name: Test
-      run: go test -v ./...
+      run: go test -v -short ./...
     
     - name: Generate coverage report
       run: go test -v -short ./... -race -coverprofile=coverage.txt -covermode=atomic
