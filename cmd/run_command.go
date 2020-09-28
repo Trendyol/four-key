@@ -61,7 +61,12 @@ func init() {
 func onRun(cmd *cobra.Command, args []string) {
 	repositoryName, err := cmd.Flags().GetString("repository")
 	startDateInput, err := cmd.Flags().GetString("startDate")
-	startDate, err := time.Parse(settings.DefaultDateFormat, startDateInput)
+
+	startDate, err := time.Parse(settings.DefaultDateFormat, "2010-01-01")
+
+	if startDateInput != "" {
+		startDate, err = time.Parse(settings.DefaultDateFormat, startDateInput)
+	}
 
 	if err != nil {
 		fmt.Println(commander.Warn("invalid start date, start date will be like -s YYYY-MM-DD"))
@@ -69,7 +74,12 @@ func onRun(cmd *cobra.Command, args []string) {
 	}
 
 	endDateInput, err := cmd.Flags().GetString("endDate")
-	endDate, err := time.Parse(settings.DefaultDateFormat, endDateInput)
+
+	endDate, err := time.Parse(settings.DefaultDateFormat, time.Now().Format(settings.DefaultDateFormat))
+
+	if endDateInput != "" {
+		endDate, err = time.Parse(settings.DefaultDateFormat, endDateInput)
+	}
 
 	if err != nil {
 		fmt.Println(commander.Warn("invalid end date, end date will be like -s YYYY-MM-DD"))
