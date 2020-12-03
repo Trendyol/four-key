@@ -47,7 +47,8 @@ func GetChangeFailPercentage(metricTags []tagMetricData) []tagMetricData {
 			totalFeatureCount += len(metricTags[i].featCommits)
 		}
 		if totalFeatureCount != 0 {
-			metricTags[i].tagChangeFailPercentage = float64(totalFixCount) / float64(totalFeatureCount) * 100
+                        totalCommits := float64(totalFixCount) + float64(totalFeatureCount)
+			metricTags[i].tagChangeFailPercentage = 100 * float64(totalFixCount) / totalCommits
 		}
 	}
 
