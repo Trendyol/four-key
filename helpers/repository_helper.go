@@ -82,7 +82,7 @@ func GetRepositoryByName(s *settings.Settings, repositoryName string) (Repositor
 	return w, errors.New("repository not found with that given name -> " + repositoryName)
 }
 
-func RepoCheck(r *git.Repository) {
+func RepoCheck(r *git.Repository) error {
 	_, err := r.Log(&git.LogOptions{
 		From:     plumbing.Hash{},
 		Order:    0,
@@ -105,7 +105,7 @@ func RepoCheck(r *git.Repository) {
 	// Print the latest commit that was just pulled
 	ref, err := r.Head()
 	if err != nil {
-		panic(err)
+		return errors.New("metrics could not be calculated because: commit not found")
 	}
 
 	_, err = r.CommitObject(ref.Hash())
@@ -114,6 +114,7 @@ func RepoCheck(r *git.Repository) {
 		panic(fmt.Sprintf("An error occurred. Error: %v", err))
 	}
 
+	return nil
 }
 
 func CloneRepository(cloneLink string, p string) error {

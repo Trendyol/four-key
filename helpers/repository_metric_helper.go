@@ -55,7 +55,11 @@ func CalculateMetrics(repo *git.Repository, request MetricsRequest) (FourKeyMetr
 
 	var keyMetrics FourKeyMetricResultDto
 
-	RepoCheck(repo)
+	err := RepoCheck(repo)
+
+	if err != nil {
+		return keyMetrics, err
+	}
 
 	tagCommits, err := getTagCommitBetweenDates(repo, request)
 
